@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Homepage from "./Homepage";
 import Menupage from "./Menupage";
 import Sidebar from "../../Components/Sidebar";
@@ -10,9 +10,30 @@ import Notifications from "./Notifications";
 import MobileSidebar from "../../Components/MobileSidebar";
 
 const Page = () => {
-  const [activeComponent, setIsActiveComponent] = useState("Home");
-  const [sidebarOpen, setIsSidebarOpen]=useState(false)
+  const getInitialComponent = () => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get("tab");
+      if (tab) {
+        return tab;
+      }
+    }
+    return "Home";
+  };
+
+  const [activeComponent, setIsActiveComponent] = useState(getInitialComponent);
+  const [sidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    params.set("tab", activeComponent);
+    window.history.replaceState(
+      {},
+      "",
+      `${window.location.pathname}?${params.toString()}`
+    );
+  }, [activeComponent]);
 
   const renderActiveComponent = () => {
     switch (activeComponent) {
@@ -27,7 +48,7 @@ const Page = () => {
       case "Notifications":
         return <Notifications />;
       default:
-        return <Homepage />;
+        return <Homepage setIsActiveComponent={setIsActiveComponent} />;
     }
   };
   return (

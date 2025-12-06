@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "../AdminComponents/Navbar"
 import Sidebar from "../AdminComponents/Sidebar"
 import Dashboard from "./Dashboard";
@@ -8,7 +8,30 @@ import Feedbacks from "./Feedbacks";
 import Customers from "./Customers";
 
 const AdminPage = () => {
-  const [activeComponent, setIsActiveComponent] = useState("Dashboard");
+  const getInitialComponent = () => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const tab = params.get("tab");
+      const validTabs = ["Dashboard", "Orders", "Menu", "Feedback", "Customers"];
+      if (tab && validTabs.includes(tab)) {
+        return tab;
+      }
+    }
+    return "Dashboard";
+  };
+
+  const [activeComponent, setIsActiveComponent] = useState(getInitialComponent);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    params.set("tab", activeComponent);
+    window.history.replaceState(
+      {},
+      "",
+      `${window.location.pathname}?${params.toString()}`
+    );
+  }, [activeComponent]);
+
   const renderActiveComponent = () => {
     switch (activeComponent) {
       case "Dashboard":
