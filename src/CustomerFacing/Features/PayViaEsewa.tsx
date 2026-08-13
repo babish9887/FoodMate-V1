@@ -1,37 +1,36 @@
 import toast from "react-hot-toast";
 import Button from "../../Components/UI/Button";
-import CryptoJS from "crypto-js";
+import { getEsewaSignatureApi } from "../../Api/order";
 
-const PayViaEsewa = ({ id, totalPayment }: { id: string, totalPayment:number }) => {
-  const handlePayViaEsewa = () => {
+const PayViaEsewa = ({ id, totalPayment }: { id: string, totalPayment: number }) => {
+  const handlePayViaEsewa = async () => {
     window.localStorage.setItem("orderId", id);
     try {
-      const uuid = new Date().getTime().toString().slice(-6);
-      const jsonData: any = {
-        amount: totalPayment.toFixed(2).toString(),
-        failure_url: `${import.meta.env.VITE_URL}/esewa/purchase_fail`,
+      const transaction_uuid = `${id}-${Date.now()}`;
+      const total_amount = totalPayment.toFixed(2).toString();
+
+      const { signature, product_code } = await getEsewaSignatureApi({
+        total_amount,
+        transaction_uuid,
+      });
+
+      const baseUrl = (import.meta.env.VITE_URL || window.location.origin).replace(/\/+$/, '');
+
+      const jsonData: Record<string, string> = {
+        amount: total_amount,
+        failure_url: `${baseUrl}/esewa/purchase_fail`,
         product_delivery_charge: "0",
         product_service_charge: "0",
-        product_code: "EPAYTEST",
-        signature: "",
+        product_code: product_code || "EPAYTEST",
+        signature,
         signed_field_names: "total_amount,transaction_uuid,product_code",
-
-        success_url: `${import.meta.env.VITE_URL}/esewa/payment_success`,
+        success_url: `${baseUrl}/esewa/payment_success`,
         tax_amount: "0",
-        total_amount: totalPayment.toFixed(2).toString(),
-        transaction_uuid: uuid,
+        total_amount,
+        transaction_uuid,
       };
-      let url = "https://rc-epay.esewa.com.np/api/epay/main/v2/form";
 
-      const message =
-        "total_amount=" +
-        jsonData.total_amount +
-        ",transaction_uuid=" +
-        jsonData.transaction_uuid +
-        ",product_code=" +
-        jsonData.product_code;
-      const signature = createSignature(message);
-      jsonData.signature = signature;
+      const url = "https://rc-epay.esewa.com.np/api/epay/main/v2/form";
 
       const form = document.createElement("form");
       for (const key in jsonData) {
@@ -46,18 +45,11 @@ const PayViaEsewa = ({ id, totalPayment }: { id: string, totalPayment:number }) 
       form.setAttribute("action", url);
       document.body.appendChild(form);
       form.submit();
-    } catch (error) {
-      toast.error("Something Unexpected Happen! Please Try Again later");
-      console.log(error)
-    } finally {
+    } catch (error: any) {
+      toast.error(error.message || "Failed to initiate eSewa payment.");
+      console.error(error);
     }
   };
-  function createSignature(message:string) {
-    const hash = CryptoJS.HmacSHA256(message,"8gBm/:&EnhH.1/q");
-    const hashInBase64 = CryptoJS.enc.Base64.stringify(hash);
-    return hashInBase64;
-  }
-  
 
   return (
     <Button
@@ -69,4 +61,4 @@ const PayViaEsewa = ({ id, totalPayment }: { id: string, totalPayment:number }) 
   );
 };
 
-export default PayViaEsewa;
+export default PayViaEsewa;

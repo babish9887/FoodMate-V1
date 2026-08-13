@@ -1,22 +1,13 @@
 import { useSignUpGoogle } from "../../Queries/useSignUpGoogle";
-import { jwtDecode } from "jwt-decode";
 import { GoogleLogin as Google } from "@react-oauth/google";
 
 const GoogleLogin = () => {
-
   const { signupGoogle } = useSignUpGoogle();
 
   const responseMessage = async (response: any) => {
-    
-    const token = response.credential;
-    const decoded: any = jwtDecode(token);
-    
-    const userData = {
-      email: decoded.email,
-      name: decoded.name,
-      picture: decoded.picture,
-    };
-    signupGoogle(userData);
+    if (response.credential) {
+      signupGoogle({ idToken: response.credential });
+    }
   };
 
   const errorMessage = () => {
@@ -25,3 +16,4 @@ const GoogleLogin = () => {
 };
 
 export default GoogleLogin;
+

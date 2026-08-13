@@ -1,7 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import { signUpGoogleApi } from "../Api/auth";
 import toast from "react-hot-toast";
-import setCookie from "../Utils/setCookie";
 
 export function useSignUpGoogle() {
   const {
@@ -11,18 +10,14 @@ export function useSignUpGoogle() {
     error,
   } = useMutation({
     mutationFn: signUpGoogleApi,
-    onSuccess: (data) => {
-      setCookie(data.token)
+    onSuccess: () => {
+      // Cookie is set by the server via Set-Cookie header
       setTimeout(() => {
         window.location.href = "/";
-      }, );
+      });
     },
     onError: (error) => {
-      toast.error(error.message)
-      // console.error( error);
-      // setTimeout(() => {
-      //   window.location.href = "/";
-      // });
+      toast.error(error.message);
     },
   });
 

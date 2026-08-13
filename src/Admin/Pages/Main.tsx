@@ -1,26 +1,31 @@
 import { Navigate } from 'react-router-dom';
 import AdminPage from './AdminMain';
 import { useState, useEffect } from 'react';
-import { getCookie } from '../../Utils/getCookie';
 
 const ProtectedRoute = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
 
-
-
     useEffect(() => {
-        const jwtToken = getCookie('adminjwt');
-        if (jwtToken) {
-            setIsAuthenticated(true);
-        } else {
-            setIsAuthenticated(false);
-        }
-        setIsLoading(false); // Set loading to false after authentication check
-    }, []); // Empty dependency array ensures this runs only once on mount
+        const checkAuth = async () => {
+            try {
+                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/me`, {
+                    method: 'GET',
+                    credentials: 'include',
+                });
+                const data = await res.json();
+                setIsAuthenticated(data.success && data.user?.role === 'admin');
+            } catch {
+                setIsAuthenticated(false);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        checkAuth();
+    }, []);
 
     if (isLoading) {
-        return <div>Loading...</div>; // Or a spinner component
+        return <div>Loading...</div>;
     }
 
     return isAuthenticated ? <AdminPage /> : <Navigate to="/admin/login" />;

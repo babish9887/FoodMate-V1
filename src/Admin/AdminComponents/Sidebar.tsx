@@ -3,8 +3,15 @@ import LogoSidebar from "../../Components/UI/LogoSidebar"
 import menuItems from '../../Data/AdminNavs.json'
 const Sidebar = ({ activeComponent, setIsActiveComponent }: {activeComponent:string, setIsActiveComponent:(name:string)=>void}) => {
 
-    const logOut = () => {
-        document.cookie = `adminjwt=''; path=/; expires=${new Date(Date.now() - 1000).toUTCString()}`;
+    const logOut = async () => {
+        try {
+            await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/adminlogout`, {
+                method: 'POST',
+                credentials: 'include',
+            });
+        } catch (e) {
+            console.error('Admin logout error:', e);
+        }
         window.location.reload();
       };
     return (

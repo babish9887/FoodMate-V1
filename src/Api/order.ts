@@ -1,196 +1,191 @@
-import { getCookie } from "../Utils/getCookie";
-import { removeQuotes } from "../Utils/removeQuotes";
-import CryptoJS from "crypto-js";
-const token=getCookie('adminjwt')
+export interface UpdateOrderParams {
+  _id: string;
+  status: string;
+  message?: string;
+}
 
-const userToken=getCookie('foodmateuser')
- const encryptData = (data:any) => {
-        return CryptoJS.AES.encrypt(JSON.stringify(data), import.meta.env.VITE_RSA_SECRET_KEY).toString();
-    };
-export async function createOrderApi({items,message, paymentMethod, esewaData}:any) {
-    if(!userToken){
-        throw new Error("You are not Logged In! Please Login to Place Order")
+export async function getEsewaSignatureApi({ total_amount, transaction_uuid }: { total_amount: string; transaction_uuid: string }) {
+  try {
+    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/order/esewa-signature`, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ total_amount, transaction_uuid })
+    });
+    const data = await res.json();
+    if (data.success) {
+      return data;
+    } else {
+      throw new Error(data.message || "Failed to generate eSewa signature");
     }
-    try {
-      const encryptedData=encryptData({items, message, paymentMethod})
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/order/createorder`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          'Authorization':`Bearer ${removeQuotes(userToken)}`
-        },
-        body: JSON.stringify({data:encryptedData, esewaData})
-      });
-  
-      const data = await res.json();
-      if (data.success) {
-
-        return data;
-      } else {
-        throw new Error(data.message || "Error storing data");
-      }
-    } catch (error) {
-      console.error( error);
-      throw error;
-    }
+  } catch (error) {
+    console.error("eSewa signature API error:", error);
+    throw error;
   }
+}
 
-  export async function getAllOrdersApi(){
+export async function createOrderApi({ items, message, paymentMethod, esewaData }: { items: unknown, message?: string, paymentMethod?: string, esewaData?: unknown }) {
+  try {
+    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/order/createorder`, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ items, message, paymentMethod, esewaData })
+    });
 
-    try{
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/order/getallorders`, {
-        method: "get",
-        headers: {
-          "Content-Type": "application/json",
-          'Authorization':`Bearer ${removeQuotes(token)}`
-        },
-      });
-  
-      const data=await res.json();
-      if(data.success){
-        return data
-      }  else {
-        throw new Error(data.message || "Error fetching data");
-      }
-    } catch (error) {
-      console.error("Error sending data to the server:", error);
-      throw error;
+    const data = await res.json();
+    if (data.success) {
+      return data;
+    } else {
+      throw new Error(data.message || "Error creating order");
     }
+  } catch (error) {
+    console.error(error);
+    throw error;
   }
+}
 
-  export async function getNotPaidOrdersApi(){
+export async function getAllOrdersApi() {
+  try {
+    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/order/getallorders`, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-    try{
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/order/getnotpaidorders`, {
-        method: "get",
-        headers: {
-          "Content-Type": "application/json",
-          'Authorization':`Bearer ${removeQuotes(token)}`
-        },
-      });
-  
-      const data=await res.json();
-      if(data.success){
-        return data
-      }  else {
-        throw new Error(data.message || "Error fetching data");
-      }
-    } catch (error) {
-      console.error("Error sending data to the server:", error);
-      throw error;
+    const data = await res.json();
+    if (data.success) {
+      return data;
+    } else {
+      throw new Error(data.message || "Error fetching data");
     }
+  } catch (error) {
+    console.error("Error sending data to the server:", error);
+    throw error;
   }
+}
 
-  export async function getCurrentOrderApi(){
-    if(!userToken)
-      return 
-    try{
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/order/getcurrentorder`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          'Authorization':`Bearer ${removeQuotes(userToken)}`
+export async function getNotPaidOrdersApi() {
+  try {
+    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/order/getnotpaidorders`, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-        },
-      });
-  
-      const data=await res.json();
-      if(data.success){
-        return data
-      }  else {
-        throw new Error(data.message || "Error fetching data");
-      }
-    } catch (error) {
-      console.error("Error sending data to the server:", error);
-      throw error;
+    const data = await res.json();
+    if (data.success) {
+      return data;
+    } else {
+      throw new Error(data.message || "Error fetching data");
     }
+  } catch (error) {
+    console.error("Error sending data to the server:", error);
+    throw error;
   }
+}
 
+export async function getCurrentOrderApi() {
+  try {
+    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/order/getcurrentorder`, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-
-  export async function getTodaysOrdersApi(){
-
-    try{
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/order/gettodaysorders`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          'Authorization':`Bearer ${removeQuotes(userToken)}`
-
-        },
-      });
-  
-      const data=await res.json();
-      if(data.success){
-        return data
-      }  else {
-        // throw new Error(data.message || "Error fetching data");
-      }
-    } catch (error) {
-      console.error("Error sending data to the server:", error);
-      throw error;
+    const data = await res.json();
+    if (data.success) {
+      return data;
+    } else {
+      throw new Error(data.message || "Error fetching data");
     }
+  } catch (error) {
+    console.error("Error sending data to the server:", error);
+    throw error;
   }
-  
-  export async function getOlderOrdersApi(){
+}
 
-    try{
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/order/getolderorders`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          'Authorization':`Bearer ${removeQuotes(userToken)}`
+export async function getTodaysOrdersApi() {
+  try {
+    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/order/gettodaysorders`, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-        },
-      });
-  
-      const data=await res.json();
-      if(data.success){
-        return data
-      }  else {
-        throw new Error(data.message || "Error fetching data");
-      }
-    } catch (error) {
-      // console.error( error);
-      throw error;
+    const data = await res.json();
+    if (data.success) {
+      return data;
     }
+  } catch (error) {
+    console.error("Error sending data to the server:", error);
+    throw error;
   }
+}
 
+export async function getOlderOrdersApi() {
+  try {
+    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/order/getolderorders`, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-
-
-  export async function updateOrderApi({_id, status, message}:any) {
-   
-    try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/order/updatecurrentorder`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          'Authorization':`Bearer ${removeQuotes(token)}`
-        },
-        body: JSON.stringify({_id, status, message}),
-      });
-  
-      const data = await res.json();
-      if (data.success) {
-        return data;
-      } else {
-        throw new Error(data.message || "Error updating Category");
-      }
-    } catch (error) {
-      console.error("Error sending data to the server:", error);
-      throw error;
+    const data = await res.json();
+    if (data.success) {
+      return data;
+    } else {
+      throw new Error(data.message || "Error fetching data");
     }
+  } catch (error) {
+    throw error;
   }
+}
+
+export async function updateOrderApi({ _id, status, message }: UpdateOrderParams) {
+  try {
+    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/order/updatecurrentorder`, {
+      method: "PUT",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ _id, status, message: message || "" }),
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      return data;
+    } else {
+      throw new Error(data.message || "Error updating order status");
+    }
+  } catch (error) {
+    console.error("Error sending data to the server:", error);
+    throw error;
+  }
+}
 
 export async function updateOrderItemsApi({ _id, items }: { _id: string, items: any[] }) {
-  
   try {
     const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/order/updateorderitems`, {
       method: "PUT",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        'Authorization': `Bearer ${removeQuotes(userToken)}`
       },
       body: JSON.stringify({ _id, items }),
     });
@@ -207,78 +202,71 @@ export async function updateOrderItemsApi({ _id, items }: { _id: string, items: 
   }
 }
 
+export async function updateOrderToPaidApi({ _id, paymentMethod, esewaData }: { _id: string, paymentMethod: string, esewaData?: unknown }) {
+  try {
+    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/order/updatepayment`, {
+      method: "PUT",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ _id, paymentMethod, esewaData: esewaData || null }),
+    });
 
-  export async function updateOrderToPaidApi({_id,paymentMethod, esewaData }:any) {
-   
-    try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/order/updatepayment`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          'Authorization':`Bearer ${removeQuotes(token)}`
-        },
-        body: JSON.stringify({_id, paymentMethod, esewaData}),
-      });
-  
-      const data = await res.json();
-      if (data.success) {
-        return data;
-      } else {
-        throw new Error(data.message || "Error updating Category");
-      }
-    } catch (error) {
-      console.error("Error sending data to the server:", error);
-      throw error;
+    const data = await res.json();
+    if (data.success) {
+      return data;
+    } else {
+      throw new Error(data.message || "Error updating payment status");
     }
+  } catch (error) {
+    console.error("Error sending data to the server:", error);
+    throw error;
   }
+}
 
+export async function cancelOrderApi({ _id, message }: { _id: string, message?: string }) {
+  try {
+    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/order/cancelorder`, {
+      method: "PUT",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ _id, message: message || "Cancelled by user" }),
+    });
 
-
-  export async function cancelOrderApi({_id, message}:any) {
-   
-    try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/order/cancelorder`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          'Authorization':`Bearer ${removeQuotes(userToken)}`
-        },
-        body: JSON.stringify({_id,  message}),
-      });
-  
-      const data = await res.json();
-      if (data.success) {
-        return data;
-      } else {
-        throw new Error(data.message || "Error updating Category");
-      }
-    } catch (error) {
-      console.error("Error sending data to the server:", error);
-      throw error;
+    const data = await res.json();
+    if (data.success) {
+      return data;
+    } else {
+      throw new Error(data.message || "Error cancelling order");
     }
+  } catch (error) {
+    console.error("Error sending data to the server:", error);
+    throw error;
   }
+}
 
+export async function refundApi({ _id }: { _id: string }) {
+  try {
+    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/order/refund`, {
+      method: "PUT",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ _id }),
+    });
 
-  export async function refundApi({_id}:any) {
-   
-    try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/order/refund`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          'Authorization':`Bearer ${removeQuotes(userToken)}`
-        },
-        body: JSON.stringify({_id}),
-      });
-  
-      const data = await res.json();
-      if (data.success) {
-        return data;
-      } else {
-        throw new Error(data.message || "Error Refunding");
-      }
-    } catch (error) {
-      console.error("Error sending data to the server:", error);
-      throw error;
+    const data = await res.json();
+    if (data.success) {
+      return data;
+    } else {
+      throw new Error(data.message || "Error processing refund");
     }
+  } catch (error) {
+    console.error("Error sending data to the server:", error);
+    throw error;
   }
+}

@@ -1,7 +1,10 @@
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
+import { SocketProvider } from './Context/SocketContext'
 
 createRoot(document.getElementById('root')!).render(
-    <App />
+    <SocketProvider>
+        <App />
+    </SocketProvider>
 )

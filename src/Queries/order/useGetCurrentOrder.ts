@@ -1,18 +1,27 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getCurrentOrderApi } from "../../Api/order";
-import CheckLogin from "../../Utils/CheckLogin";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useSocket } from "../../Context/SocketContext";
 
 export function useGetCurrentOrder() {
-  const [user, setUser] = useState<any>(null);
+
+  const queryClient = useQueryClient();
+  const { socket } = useSocket();
 
   useEffect(() => {
-    const fetchUser = async () => {
-      const loggedInUser = await CheckLogin();
-      setUser(loggedInUser);
+    if (!socket) return;
+
+    const handleOrderUpdate = () => {
+      // We can optionally check if the update is for this user, but invalidating safely works
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+    }
+
+    socket.on('order-update', handleOrderUpdate);
+
+    return () => {
+      socket.off('order-update', handleOrderUpdate);
     };
-    fetchUser();
-  }, []);
+  }, [socket, queryClient]);
 
   const {
     data,
@@ -24,7 +33,6 @@ export function useGetCurrentOrder() {
   } = useQuery({
     queryKey: ['orders'],
     queryFn: getCurrentOrderApi,
-    refetchInterval: user == null ? false : 2000
   });
 
   return {

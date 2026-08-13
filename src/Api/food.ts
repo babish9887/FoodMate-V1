@@ -1,10 +1,5 @@
 import convertBase64 from "../Utils/ConvertBase64";
-import { getCookie } from "../Utils/getCookie";
-import { removeQuotes } from "../Utils/removeQuotes";
 import { Food } from "../Utils/types";
-const token = getCookie("adminjwt");
-
-const userToken = getCookie("foodmateuser");
 
 export async function addFoodApi(food: Food) {
   const image = await convertBase64(food.image);
@@ -13,9 +8,9 @@ export async function addFoodApi(food: Food) {
       `${import.meta.env.VITE_BACKEND_URL}/api/food/createfood`,
       {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${removeQuotes(token)}`,
         },
         body: JSON.stringify({ ...food, image: image }),
       }
@@ -56,6 +51,7 @@ export async function getFoodsApi() {
     throw error;
   }
 }
+
 export async function getAdminFoodsApi() {
   try {
     const res = await fetch(
@@ -102,9 +98,9 @@ export async function updateFoodApi({
       `${import.meta.env.VITE_BACKEND_URL}/api/food/updatefood/${_id}`,
       {
         method: "PUT",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${removeQuotes(token)}`,
         },
         body: JSON.stringify({
           name,
@@ -140,14 +136,12 @@ export async function updateFoodAvailabilityApi({
 }) {
   try {
     const res = await fetch(
-      `${
-        import.meta.env.VITE_BACKEND_URL
-      }/api/food/updatefoodavailability/${_id}`,
+      `${import.meta.env.VITE_BACKEND_URL}/api/food/updatefoodavailability/${_id}`,
       {
         method: "PUT",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${removeQuotes(token)}`,
         },
         body: JSON.stringify({ available }),
       }
@@ -171,9 +165,9 @@ export async function deleteFoodApi(id: any) {
       `${import.meta.env.VITE_BACKEND_URL}/api/food/deletefood/${id}`,
       {
         method: "DELETE",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${removeQuotes(token)}`,
         },
       }
     );
@@ -196,9 +190,9 @@ export async function getRecommendedFoodsApi() {
       `${import.meta.env.VITE_BACKEND_URL}/api/food/getrecommendedfoods`,
       {
         method: "GET",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${removeQuotes(userToken)}`,
         },
       }
     );

@@ -1,10 +1,7 @@
 import convertBase64 from "../Utils/ConvertBase64";
-import { getCookie } from "../Utils/getCookie";
-import { removeQuotes } from "../Utils/removeQuotes";
-const token=getCookie('adminjwt')
 
-export async function getCategoriesApi(){
-  try{
+export async function getCategoriesApi() {
+  try {
     const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/food/category`, {
       method: "GET",
       headers: {
@@ -12,10 +9,10 @@ export async function getCategoriesApi(){
       },
     });
 
-    const data=await res.json();
-    if(data.success){
-      return data
-    }  else {
+    const data = await res.json();
+    if (data.success) {
+      return data;
+    } else {
       throw new Error(data.message || "Error fetching data");
     }
   } catch (error) {
@@ -25,47 +22,44 @@ export async function getCategoriesApi(){
 }
 
 export async function AddCategoryApi({
-    name,
-    icon
-  }: {
-    name: string | null;
-    icon:any
-  }) {
+  name,
+  icon
+}: {
+  name: string | null;
+  icon: any
+}) {
+  const iconBase64 = await convertBase64(icon);
 
-    const iconBase64=await convertBase64(icon)
-
-    try {
-      const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/food/category/addcategory`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        'Authorization':`Bearer ${removeQuotes(token)}`
-
-        },
-        body: JSON.stringify({ name,icon:iconBase64}),
-      });
-  
-      const data = await res.json();
-      if (data.success) {
-        return data;
-      } else {
-        throw new Error(data.message || "Error storing data");
-      }
-    } catch (error) {
-      console.error("Error sending data to the server:", error);
-      throw error;
-    }
-  }
-export async function DeleteCategoryApi(id:any){
-  try{
-    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/food/category/deletecategory/${id}`, {
-      method: "DELETE",
+  try {
+    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/food/category/addcategory`, {
+      method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        'Authorization':`Bearer ${removeQuotes(token)}`
-
       },
+      body: JSON.stringify({ name, icon: iconBase64 }),
+    });
 
+    const data = await res.json();
+    if (data.success) {
+      return data;
+    } else {
+      throw new Error(data.message || "Error storing data");
+    }
+  } catch (error) {
+    console.error("Error sending data to the server:", error);
+    throw error;
+  }
+}
+
+export async function DeleteCategoryApi(id: any) {
+  try {
+    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/food/category/deletecategory/${id}`, {
+      method: "DELETE",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
 
     const data = await res.json();
@@ -74,10 +68,10 @@ export async function DeleteCategoryApi(id:any){
     } else {
       throw new Error(data.message || "Error deleting data");
     }
-    } catch (error) {
-      console.error("Error sending data to the server:", error);
-      throw error;
-    }
+  } catch (error) {
+    console.error("Error sending data to the server:", error);
+    throw error;
+  }
 }
 
 export async function UpdateCategoryApi({
@@ -85,25 +79,24 @@ export async function UpdateCategoryApi({
   name,
   icon
 }: {
-  _id:string,
+  _id: string,
   name: string | null;
-  icon:any
+  icon: any
 }) {
-  let iconBase64=undefined
-  if(icon instanceof File || icon instanceof FileList)
-    iconBase64=await convertBase64(icon)
-  else{
-    iconBase64=icon
+  let iconBase64 = undefined;
+  if (icon instanceof File || icon instanceof FileList)
+    iconBase64 = await convertBase64(icon);
+  else {
+    iconBase64 = icon;
   }
   try {
     const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/food/category/updatecategory/${_id}`, {
       method: "PUT",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        'Authorization':`Bearer ${removeQuotes(token)}`
-
       },
-      body: JSON.stringify({ name,icon:iconBase64}),
+      body: JSON.stringify({ name, icon: iconBase64 }),
     });
 
     const data = await res.json();

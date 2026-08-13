@@ -78,11 +78,12 @@ const OrderCard = ({ order }: { order: any }) => {
           setInputMessage={setMessage}
           onConfirm={() =>
             updateOrder({
-              _id: deleteDialogOpen.id,
-              status: deleteDialogOpen.st,
-              message,
+              _id: deleteDialogOpen.id!,
+              status: deleteDialogOpen.st!,
+              message: message || undefined,
             })
           }
+
           onCancel={() =>
             setDeleteDialogOpen((prev) => ({ ...prev, id: null, st: null }))
           }

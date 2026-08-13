@@ -1,5 +1,3 @@
-import setCookie from "../Utils/setCookie";
-
 export async function signUpApi({
   name,
   email,
@@ -12,6 +10,7 @@ export async function signUpApi({
   try {
     const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/signup`, {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
@@ -31,34 +30,32 @@ export async function signUpApi({
 }
 
 export async function signUpGoogleApi({
-  name,
-  email,
-  picture,
+  idToken,
 }: {
-  name: string;
-  email: string;
-  picture: string;
+  idToken: string;
 }) {
   try {
-    const res=await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/googlesignup`, {
+    const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/googlesignup`, {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ name, email, picture }),
+      body: JSON.stringify({ idToken }),
     });
 
-      const data = await res.json();
-      if (data.success) {
-        return data;
-      } else {
-        throw new Error(data.message || "Error storing data");
-      }
+    const data = await res.json();
+    if (data.success) {
+      return data;
+    } else {
+      throw new Error(data.message || "Google sign-in failed");
+    }
   } catch (error) {
-    console.error("Error sending data to the server:", error);
+    console.error("Error sending Google token to server:", error);
     throw error;
   }
 }
+
 
 export async function loginApi({
   email,
@@ -70,6 +67,7 @@ export async function loginApi({
   try {
     const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/login`, {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
@@ -78,8 +76,6 @@ export async function loginApi({
 
     const data = await res.json();
     if (data.success) {
-      setCookie(data.token)
-
       return data;
     } else {
       throw new Error(data.message || "Error storing data");
@@ -100,6 +96,7 @@ export async function adminLoginApi({
   try {
     const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/adminlogin`, {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
@@ -108,8 +105,6 @@ export async function adminLoginApi({
 
     const data = await res.json();
     if (data.success) {
-      setCookie(data.token, 'adminjwt')
-
       return data;
     } else {
       throw new Error(data.message || "Error storing data");
@@ -129,6 +124,7 @@ export async function passwordResetEmailApi({
   try {
     const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/sendpasswordresetlink`, {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
@@ -160,6 +156,7 @@ export async function resetPasswordApi({
   try {
     const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/resetpassword`, {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },

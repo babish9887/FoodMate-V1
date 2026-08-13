@@ -33,10 +33,11 @@ const CurrentOrderCard = () => {
     );
 
   const handleCancelUser = () => {
-    if (message === "") return;
+    if (!deleteDialogOpen || message === "") return;
     cancelOrder({ _id: deleteDialogOpen, message });
     setDeleteDialogOpen(null);
   };
+
 
   // Initialize item quantities when entering edit mode
   const startEditingItems = (items: OrderItem[]) => {

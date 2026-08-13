@@ -1,6 +1,11 @@
-export const logOut = () => {
-    document.cookie = `foodmateuser=''; path=/; expires=${new Date(
-      Date.now() - 1000
-    ).toUTCString()}`;
-    window.location.reload();
-  };
+export const logOut = async () => {
+  try {
+    await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/auth/logout`, {
+      method: "POST",
+      credentials: "include",
+    });
+  } catch (error) {
+    console.error("Logout error:", error);
+  }
+  window.location.reload();
+};
